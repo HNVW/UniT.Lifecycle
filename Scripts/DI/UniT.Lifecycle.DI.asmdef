@@ -2,6 +2,7 @@
   "name": "UniT.Lifecycle.DI",
   "rootNamespace": "UniT.Lifecycle.DI",
   "references": [
+    "UniT.Logging.DI",
     "UniT.Lifecycle",
     "UniT.DI",
     "Zenject",

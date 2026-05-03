@@ -77,7 +77,7 @@ namespace UniT.Lifecycle
         {
             if (this.isLoading)
             {
-                await UniTask.WaitUntil(this, @this => !@this.isLoading, cancellationToken: cancellationToken);
+                await UniTask.WaitUntil(this, static @this => !@this.isLoading, cancellationToken: cancellationToken);
             }
 
             if (this.eventListener) return;
@@ -87,7 +87,7 @@ namespace UniT.Lifecycle
             {
                 var subProgresses = progress.CreateSubProgresses(3).ToArray();
                 this.logger.Debug("Early loading");
-                this.earlyLoadableServices.ForEach((service, @this) =>
+                this.earlyLoadableServices.ForEach(static (service, @this) =>
                 {
                     @this.logger.Debug($"Loading {service.GetType().Name}");
                     service.Load();
@@ -106,7 +106,7 @@ namespace UniT.Lifecycle
                 this.logger.Debug("Early loaded");
                 subProgresses[0]?.Report(1);
                 this.logger.Debug("Loading");
-                this.loadableServices.ForEach((service, @this) =>
+                this.loadableServices.ForEach(static (service, @this) =>
                 {
                     @this.logger.Debug($"Loading {service.GetType().Name}");
                     service.Load();
@@ -125,7 +125,7 @@ namespace UniT.Lifecycle
                 this.logger.Debug("Loaded");
                 subProgresses[1]?.Report(1);
                 this.logger.Debug("Late loading");
-                this.lateLoadableServices.ForEach((service, @this) =>
+                this.lateLoadableServices.ForEach(static (service, @this) =>
                 {
                     @this.logger.Debug($"Loading {service.GetType().Name}");
                     service.Load();
@@ -165,12 +165,12 @@ namespace UniT.Lifecycle
             {
                 var subProgresses = progress.CreateSubProgresses(3).ToArray();
                 this.logger.Debug("Early loading");
-                this.earlyLoadableServices.ForEach(service =>
+                this.earlyLoadableServices.ForEach(static (service, @this) =>
                 {
-                    this.logger.Debug($"Loading {service.GetType().Name}");
+                    @this.logger.Debug($"Loading {service.GetType().Name}");
                     service.Load();
-                    this.logger.Debug($"Loaded {service.GetType().Name}");
-                });
+                    @this.logger.Debug($"Loaded {service.GetType().Name}");
+                }, this);
                 yield return this.asyncEarlyLoadableServices.ForEachAsync(
                     (service, progress) =>
                     {
@@ -182,12 +182,12 @@ namespace UniT.Lifecycle
                 this.logger.Debug("Early loaded");
                 subProgresses[0]?.Report(1);
                 this.logger.Debug("Loading");
-                this.loadableServices.ForEach(service =>
+                this.loadableServices.ForEach(static (service, @this) =>
                 {
-                    this.logger.Debug($"Loading {service.GetType().Name}");
+                    @this.logger.Debug($"Loading {service.GetType().Name}");
                     service.Load();
-                    this.logger.Debug($"Loaded {service.GetType().Name}");
-                });
+                    @this.logger.Debug($"Loaded {service.GetType().Name}");
+                }, this);
                 yield return this.asyncLoadableServices.ForEachAsync(
                     (service, progress) =>
                     {
@@ -199,12 +199,12 @@ namespace UniT.Lifecycle
                 this.logger.Debug("Loaded");
                 subProgresses[1]?.Report(1);
                 this.logger.Debug("Late loading");
-                this.lateLoadableServices.ForEach(service =>
+                this.lateLoadableServices.ForEach(static (service, @this) =>
                 {
-                    this.logger.Debug($"Loading {service.GetType().Name}");
+                    @this.logger.Debug($"Loading {service.GetType().Name}");
                     service.Load();
-                    this.logger.Debug($"Loaded {service.GetType().Name}");
-                });
+                    @this.logger.Debug($"Loaded {service.GetType().Name}");
+                }, this);
                 yield return this.asyncLateLoadableServices.ForEachAsync(
                     (service, progress) =>
                     {
