@@ -11,11 +11,8 @@ namespace UniT.Lifecycle
     {
         [Preserve]
         public ZenjectLifecycleManager(
-            [InjectLocal] IEnumerable<IEarlyLoadable>      earlyLoadableServices,
             [InjectLocal] IEnumerable<IAsyncEarlyLoadable> asyncEarlyLoadableServices,
-            [InjectLocal] IEnumerable<ILoadable>           loadableServices,
             [InjectLocal] IEnumerable<IAsyncLoadable>      asyncLoadableServices,
-            [InjectLocal] IEnumerable<ILateLoadable>       lateLoadableServices,
             [InjectLocal] IEnumerable<IAsyncLateLoadable>  asyncLateLoadableServices,
             [InjectLocal] IEnumerable<IUpdatable>          updatableServices,
             [InjectLocal] IEnumerable<ILateUpdatable>      lateUpdatableServices,
@@ -26,11 +23,8 @@ namespace UniT.Lifecycle
             [InjectLocal] IEnumerable<IResumeListener>     resumeListeners,
             ILoggerManager                                 loggerManager
         ) : base(
-            earlyLoadableServices,
             asyncEarlyLoadableServices,
-            loadableServices,
             asyncLoadableServices,
-            lateLoadableServices,
             asyncLateLoadableServices,
             updatableServices,
             lateUpdatableServices,

@@ -11,11 +11,8 @@ namespace UniT.Lifecycle
     {
         [Preserve]
         public VContainerLifecycleManager(
-            ContainerLocal<IEnumerable<IEarlyLoadable>>      earlyLoadableServices,
             ContainerLocal<IEnumerable<IAsyncEarlyLoadable>> asyncEarlyLoadableServices,
-            ContainerLocal<IEnumerable<ILoadable>>           loadableServices,
             ContainerLocal<IEnumerable<IAsyncLoadable>>      asyncLoadableServices,
-            ContainerLocal<IEnumerable<ILateLoadable>>       lateLoadableServices,
             ContainerLocal<IEnumerable<IAsyncLateLoadable>>  asyncLateLoadableServices,
             ContainerLocal<IEnumerable<IUpdatable>>          updatableServices,
             ContainerLocal<IEnumerable<ILateUpdatable>>      lateUpdatableServices,
@@ -26,11 +23,8 @@ namespace UniT.Lifecycle
             ContainerLocal<IEnumerable<IResumeListener>>     resumeListeners,
             ILoggerManager                                   loggerManager
         ) : base(
-            earlyLoadableServices.Value,
             asyncEarlyLoadableServices.Value,
-            loadableServices.Value,
             asyncLoadableServices.Value,
-            lateLoadableServices.Value,
             asyncLateLoadableServices.Value,
             updatableServices.Value,
             lateUpdatableServices.Value,

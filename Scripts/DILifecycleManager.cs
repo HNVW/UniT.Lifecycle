@@ -10,11 +10,8 @@ namespace UniT.Lifecycle
     {
         [Preserve]
         public DILifecycleManager(
-            IEnumerable<IEarlyLoadable>      earlyLoadableServices,
             IEnumerable<IAsyncEarlyLoadable> asyncEarlyLoadableServices,
-            IEnumerable<ILoadable>           loadableServices,
             IEnumerable<IAsyncLoadable>      asyncLoadableServices,
-            IEnumerable<ILateLoadable>       lateLoadableServices,
             IEnumerable<IAsyncLateLoadable>  asyncLateLoadableServices,
             IEnumerable<IUpdatable>          updatableServices,
             IEnumerable<ILateUpdatable>      lateUpdatableServices,
@@ -25,11 +22,8 @@ namespace UniT.Lifecycle
             IEnumerable<IResumeListener>     resumeListeners,
             ILoggerManager                   loggerManager
         ) : base(
-            earlyLoadableServices,
             asyncEarlyLoadableServices,
-            loadableServices,
             asyncLoadableServices,
-            lateLoadableServices,
             asyncLateLoadableServices,
             updatableServices,
             lateUpdatableServices,

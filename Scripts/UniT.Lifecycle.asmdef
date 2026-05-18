@@ -3,6 +3,7 @@
   "rootNamespace": "UniT.Lifecycle",
   "references": [
     "UniT.Extensions",
+    "UniT.Extensions.UniTask",
     "UniT.Logging",
     "UniT.DI",
     "Zenject",
@@ -24,11 +25,6 @@
       "name": "jp.hadashikick.vcontainer",
       "expression": "",
       "define": "UNIT_VCONTAINER"
-    },
-    {
-      "name": "com.cysharp.unitask",
-      "expression": "",
-      "define": "UNIT_UNITASK"
     }
   ]
 }

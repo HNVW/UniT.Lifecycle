@@ -4,24 +4,19 @@ namespace UniT.Lifecycle
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
+    using Cysharp.Threading.Tasks;
     using UniT.Extensions;
+    using UniT.Extensions.UniTask;
     using UniT.Logging;
     using UnityEngine;
     using ILogger = UniT.Logging.ILogger;
-    #if UNIT_UNITASK
-    using System.Threading;
-    using Cysharp.Threading.Tasks;
-    #else
-    using System.Collections;
-    #endif
+    using Object = UnityEngine.Object;
 
     public abstract class LifecycleManager : ILifecycleManager
     {
-        private readonly IReadOnlyList<IEarlyLoadable>      earlyLoadableServices;
         private readonly IReadOnlyList<IAsyncEarlyLoadable> asyncEarlyLoadableServices;
-        private readonly IReadOnlyList<ILoadable>           loadableServices;
         private readonly IReadOnlyList<IAsyncLoadable>      asyncLoadableServices;
-        private readonly IReadOnlyList<ILateLoadable>       lateLoadableServices;
         private readonly IReadOnlyList<IAsyncLateLoadable>  asyncLateLoadableServices;
 
         private readonly IReadOnlyList<IUpdatable>         updatableServices;
@@ -35,11 +30,8 @@ namespace UniT.Lifecycle
         private readonly ILogger logger;
 
         protected LifecycleManager(
-            IEnumerable<IEarlyLoadable>      earlyLoadableServices,
             IEnumerable<IAsyncEarlyLoadable> asyncEarlyLoadableServices,
-            IEnumerable<ILoadable>           loadableServices,
             IEnumerable<IAsyncLoadable>      asyncLoadableServices,
-            IEnumerable<ILateLoadable>       lateLoadableServices,
             IEnumerable<IAsyncLateLoadable>  asyncLateLoadableServices,
             IEnumerable<IUpdatable>          updatableServices,
             IEnumerable<ILateUpdatable>      lateUpdatableServices,
@@ -51,11 +43,8 @@ namespace UniT.Lifecycle
             ILoggerManager                   loggerManager
         )
         {
-            this.earlyLoadableServices      = earlyLoadableServices.ToArray();
             this.asyncEarlyLoadableServices = asyncEarlyLoadableServices.ToArray();
-            this.loadableServices           = loadableServices.ToArray();
             this.asyncLoadableServices      = asyncLoadableServices.ToArray();
-            this.lateLoadableServices       = lateLoadableServices.ToArray();
             this.asyncLateLoadableServices  = asyncLateLoadableServices.ToArray();
 
             this.updatableServices      = updatableServices.ToArray();
@@ -70,29 +59,19 @@ namespace UniT.Lifecycle
             this.logger.Debug("Constructed");
         }
 
-        private bool isLoading;
+        private EventListener eventListener = null!;
+        private bool          isLoading;
 
-        #if UNIT_UNITASK
         async UniTask ILifecycleManager.LoadAsync(IProgress<float>? progress, CancellationToken cancellationToken)
         {
-            if (this.isLoading)
-            {
-                await UniTask.WaitUntil(this, static @this => !@this.isLoading, cancellationToken: cancellationToken);
-            }
-
+            if (this.isLoading) await UniTask.WaitUntil(this, static @this => !@this.isLoading, cancellationToken: cancellationToken);
             if (this.eventListener) return;
-
             this.isLoading = true;
             try
             {
                 var subProgresses = progress.CreateSubProgresses(3).ToArray();
+
                 this.logger.Debug("Early loading");
-                this.earlyLoadableServices.ForEach(static (service, @this) =>
-                {
-                    @this.logger.Debug($"Loading {service.GetType().Name}");
-                    service.Load();
-                    @this.logger.Debug($"Loaded {service.GetType().Name}");
-                }, this);
                 await this.asyncEarlyLoadableServices.ForEachAsync(
                     async (service, progress, cancellationToken) =>
                     {
@@ -104,14 +83,10 @@ namespace UniT.Lifecycle
                     cancellationToken
                 );
                 this.logger.Debug("Early loaded");
+
                 subProgresses[0]?.Report(1);
+
                 this.logger.Debug("Loading");
-                this.loadableServices.ForEach(static (service, @this) =>
-                {
-                    @this.logger.Debug($"Loading {service.GetType().Name}");
-                    service.Load();
-                    @this.logger.Debug($"Loaded {service.GetType().Name}");
-                }, this);
                 await this.asyncLoadableServices.ForEachAsync(
                     async (service, progress, cancellationToken) =>
                     {
@@ -123,14 +98,10 @@ namespace UniT.Lifecycle
                     cancellationToken
                 );
                 this.logger.Debug("Loaded");
+
                 subProgresses[1]?.Report(1);
+
                 this.logger.Debug("Late loading");
-                this.lateLoadableServices.ForEach(static (service, @this) =>
-                {
-                    @this.logger.Debug($"Loading {service.GetType().Name}");
-                    service.Load();
-                    @this.logger.Debug($"Loaded {service.GetType().Name}");
-                }, this);
                 await this.asyncLateLoadableServices.ForEachAsync(
                     async (service, progress, cancellationToken) =>
                     {
@@ -142,103 +113,23 @@ namespace UniT.Lifecycle
                     cancellationToken
                 );
                 this.logger.Debug("Late loaded");
+
                 subProgresses[2]?.Report(1);
-                this.Load();
+
+                this.eventListener = new GameObject(nameof(LifecycleManager)).AddComponent<EventListener>().DontDestroyOnLoad();
+
+                foreach (var service in this.updatableServices) this.eventListener.Updating           += service.Update;
+                foreach (var service in this.lateUpdatableServices) this.eventListener.LateUpdating   += service.LateUpdate;
+                foreach (var service in this.fixedUpdatableServices) this.eventListener.FixedUpdating += service.FixedUpdate;
+                foreach (var service in this.focusLostListeners) this.eventListener.FocusLost         += service.OnFocusLost;
+                foreach (var service in this.focusGainListeners) this.eventListener.FocusGain         += service.OnFocusGain;
+                foreach (var service in this.pauseListeners) this.eventListener.Paused                += service.OnPause;
+                foreach (var service in this.resumeListeners) this.eventListener.Resumed              += service.OnResume;
             }
             finally
             {
                 this.isLoading = false;
             }
-        }
-        #else
-        IEnumerator ILifecycleManager.LoadAsync(Action? callback, IProgress<float>? progress)
-        {
-            if (this.isLoading)
-            {
-                yield return new WaitUntil(() => !this.isLoading);
-            }
-
-            if (this.eventListener) yield break;
-
-            this.isLoading = true;
-            try
-            {
-                var subProgresses = progress.CreateSubProgresses(3).ToArray();
-                this.logger.Debug("Early loading");
-                this.earlyLoadableServices.ForEach(static (service, @this) =>
-                {
-                    @this.logger.Debug($"Loading {service.GetType().Name}");
-                    service.Load();
-                    @this.logger.Debug($"Loaded {service.GetType().Name}");
-                }, this);
-                yield return this.asyncEarlyLoadableServices.ForEachAsync(
-                    (service, progress) =>
-                    {
-                        this.logger.Debug($"Loading {service.GetType().Name}");
-                        return service.LoadAsync(() => this.logger.Debug($"Loaded {service.GetType().Name}"), progress);
-                    },
-                    progress: subProgresses[0]
-                );
-                this.logger.Debug("Early loaded");
-                subProgresses[0]?.Report(1);
-                this.logger.Debug("Loading");
-                this.loadableServices.ForEach(static (service, @this) =>
-                {
-                    @this.logger.Debug($"Loading {service.GetType().Name}");
-                    service.Load();
-                    @this.logger.Debug($"Loaded {service.GetType().Name}");
-                }, this);
-                yield return this.asyncLoadableServices.ForEachAsync(
-                    (service, progress) =>
-                    {
-                        this.logger.Debug($"Loading {service.GetType().Name}");
-                        return service.LoadAsync(() => this.logger.Debug($"Loaded {service.GetType().Name}"), progress);
-                    },
-                    progress: subProgresses[1]
-                );
-                this.logger.Debug("Loaded");
-                subProgresses[1]?.Report(1);
-                this.logger.Debug("Late loading");
-                this.lateLoadableServices.ForEach(static (service, @this) =>
-                {
-                    @this.logger.Debug($"Loading {service.GetType().Name}");
-                    service.Load();
-                    @this.logger.Debug($"Loaded {service.GetType().Name}");
-                }, this);
-                yield return this.asyncLateLoadableServices.ForEachAsync(
-                    (service, progress) =>
-                    {
-                        this.logger.Debug($"Loading {service.GetType().Name}");
-                        return service.LoadAsync(() => this.logger.Debug($"Loaded {service.GetType().Name}"), progress);
-                    },
-                    progress: subProgresses[2]
-                );
-                this.logger.Debug("Late loaded");
-                subProgresses[2]?.Report(1);
-                this.Load();
-            }
-            finally
-            {
-                this.isLoading = false;
-            }
-
-            callback?.Invoke();
-        }
-        #endif
-
-        private EventListener eventListener = null!;
-
-        private void Load()
-        {
-            this.eventListener = new GameObject(nameof(LifecycleManager)).AddComponent<EventListener>().DontDestroyOnLoad();
-
-            foreach (var service in this.updatableServices) this.eventListener.Updating           += service.Update;
-            foreach (var service in this.lateUpdatableServices) this.eventListener.LateUpdating   += service.LateUpdate;
-            foreach (var service in this.fixedUpdatableServices) this.eventListener.FixedUpdating += service.FixedUpdate;
-            foreach (var service in this.focusLostListeners) this.eventListener.FocusLost         += service.OnFocusLost;
-            foreach (var service in this.focusGainListeners) this.eventListener.FocusGain         += service.OnFocusGain;
-            foreach (var service in this.pauseListeners) this.eventListener.Paused                += service.OnPause;
-            foreach (var service in this.resumeListeners) this.eventListener.Resumed              += service.OnResume;
         }
 
         private void Unload()
@@ -253,7 +144,7 @@ namespace UniT.Lifecycle
             foreach (var service in this.pauseListeners) this.eventListener.Paused                -= service.OnPause;
             foreach (var service in this.resumeListeners) this.eventListener.Resumed              -= service.OnResume;
 
-            this.eventListener.gameObject.Destroy();
+            Object.Destroy(this.eventListener.gameObject);
         }
 
         void IDisposable.Dispose()
