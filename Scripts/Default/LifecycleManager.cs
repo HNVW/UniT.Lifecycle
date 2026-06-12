@@ -105,7 +105,7 @@ namespace UniT.Lifecycle.Default
             }
         }
 
-        private void Unload()
+        void IDisposable.Dispose()
         {
             if (!this.eventListener) return;
 
@@ -118,18 +118,8 @@ namespace UniT.Lifecycle.Default
             foreach (var service in this.resumeListeners) this.eventListener.Resumed              -= service.OnResume;
 
             Object.Destroy(this.eventListener.gameObject);
-        }
 
-        void IDisposable.Dispose()
-        {
-            this.Unload();
             this.logger.Debug("Disposed");
-        }
-
-        ~LifecycleManager()
-        {
-            this.Unload();
-            this.logger.Debug("Finalized");
         }
 
         private sealed class EventListener : MonoBehaviour
