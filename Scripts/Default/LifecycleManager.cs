@@ -28,25 +28,25 @@ namespace UniT.Lifecycle.Default
 
         [Preserve]
         public LifecycleManager(
-            IEnumerable<ILoadOrder>         loadableServices,
-            IEnumerable<IUpdatable>         updatableServices,
-            IEnumerable<ILateUpdatable>     lateUpdatableServices,
-            IEnumerable<IFixedUpdatable>    fixedUpdatableServices,
-            IEnumerable<IFocusLostListener> focusLostListeners,
-            IEnumerable<IFocusGainListener> focusGainListeners,
-            IEnumerable<IPauseListener>     pauseListeners,
-            IEnumerable<IResumeListener>    resumeListeners,
-            ILoggerManager                  loggerManager
+            IReadOnlyList<ILoadOrder>         loadableServices,
+            IReadOnlyList<IUpdatable>         updatableServices,
+            IReadOnlyList<ILateUpdatable>     lateUpdatableServices,
+            IReadOnlyList<IFixedUpdatable>    fixedUpdatableServices,
+            IReadOnlyList<IFocusLostListener> focusLostListeners,
+            IReadOnlyList<IFocusGainListener> focusGainListeners,
+            IReadOnlyList<IPauseListener>     pauseListeners,
+            IReadOnlyList<IResumeListener>    resumeListeners,
+            ILoggerManager                    loggerManager
         )
         {
-            this.loadableServices       = loadableServices.ToArray();
-            this.updatableServices      = updatableServices.ToArray();
-            this.lateUpdatableServices  = lateUpdatableServices.ToArray();
-            this.fixedUpdatableServices = fixedUpdatableServices.ToArray();
-            this.focusLostListeners     = focusLostListeners.ToArray();
-            this.focusGainListeners     = focusGainListeners.ToArray();
-            this.pauseListeners         = pauseListeners.ToArray();
-            this.resumeListeners        = resumeListeners.ToArray();
+            this.loadableServices       = loadableServices;
+            this.updatableServices      = updatableServices;
+            this.lateUpdatableServices  = lateUpdatableServices;
+            this.fixedUpdatableServices = fixedUpdatableServices;
+            this.focusLostListeners     = focusLostListeners;
+            this.focusGainListeners     = focusGainListeners;
+            this.pauseListeners         = pauseListeners;
+            this.resumeListeners        = resumeListeners;
 
             this.logger = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
