@@ -1,5 +1,7 @@
 {
   "name": "UniT.Lifecycle",
+  "overrideReferences": true,
+  "noEngineReferences": true,
   "references": [
     "UniTask"
   ]

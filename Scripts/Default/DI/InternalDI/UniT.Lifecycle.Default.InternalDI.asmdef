@@ -1,5 +1,7 @@
 {
   "name": "UniT.Lifecycle.Default.InternalDI",
+  "overrideReferences": true,
+  "noEngineReferences": true,
   "references": [
     "UniT.Lifecycle.Default",
     "UniT.DI.InternalDI"

@@ -1,5 +1,7 @@
 {
   "name": "UniT.Lifecycle.Default.VContainer",
+  "overrideReferences": true,
+  "noEngineReferences": true,
   "references": [
     "UniT.Lifecycle",
     "UniT.Lifecycle.Default",

@@ -17,15 +17,16 @@ namespace UniT.Lifecycle.Default.DI
         {
             [Preserve]
             public VContainerLifecycleManager(
-                ContainerLocal<IReadOnlyList<ILoadOrder>>         loadableServices,
-                ContainerLocal<IReadOnlyList<IUpdatable>>         updatableServices,
-                ContainerLocal<IReadOnlyList<ILateUpdatable>>     lateUpdatableServices,
-                ContainerLocal<IReadOnlyList<IFixedUpdatable>>    fixedUpdatableServices,
-                ContainerLocal<IReadOnlyList<IFocusLostListener>> focusLostListeners,
-                ContainerLocal<IReadOnlyList<IFocusGainListener>> focusGainListeners,
-                ContainerLocal<IReadOnlyList<IPauseListener>>     pauseListeners,
-                ContainerLocal<IReadOnlyList<IResumeListener>>    resumeListeners,
-                ILoggerManager                                    loggerManager
+                ContainerLocal<IReadOnlyList<ILoadOrder>>                    loadableServices,
+                ContainerLocal<IReadOnlyList<IUpdatable>>                    updatableServices,
+                ContainerLocal<IReadOnlyList<ILateUpdatable>>                lateUpdatableServices,
+                ContainerLocal<IReadOnlyList<IFixedUpdatable>>               fixedUpdatableServices,
+                ContainerLocal<IReadOnlyList<IApplicationFocusLostListener>> focusLostListeners,
+                ContainerLocal<IReadOnlyList<IApplicationFocusGainListener>> focusGainListeners,
+                ContainerLocal<IReadOnlyList<IApplicationPausedListener>>    pausedListeners,
+                ContainerLocal<IReadOnlyList<IApplicationResumedListener>>   resumedListeners,
+                ContainerLocal<IReadOnlyList<IApplicationQuitedListener>>    quitedListeners,
+                ILoggerManager                                               loggerManager
             ) : base(
                 loadableServices.Value,
                 updatableServices.Value,
@@ -33,8 +34,9 @@ namespace UniT.Lifecycle.Default.DI
                 fixedUpdatableServices.Value,
                 focusLostListeners.Value,
                 focusGainListeners.Value,
-                pauseListeners.Value,
-                resumeListeners.Value,
+                pausedListeners.Value,
+                resumedListeners.Value,
+                quitedListeners.Value,
                 loggerManager
             )
             {
