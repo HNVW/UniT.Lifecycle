@@ -17,16 +17,16 @@ namespace UniT.Lifecycle.Default.DI
         {
             [Preserve]
             public VContainerLifecycleManager(
-                ContainerLocal<IReadOnlyList<ILoadOrder>>                    loadableServices,
-                ContainerLocal<IReadOnlyList<IUpdatable>>                    updatableServices,
-                ContainerLocal<IReadOnlyList<ILateUpdatable>>                lateUpdatableServices,
-                ContainerLocal<IReadOnlyList<IFixedUpdatable>>               fixedUpdatableServices,
+                ContainerLocal<IReadOnlyList<ILoadOrder>> loadableServices,
+                ContainerLocal<IReadOnlyList<IUpdatable>> updatableServices,
+                ContainerLocal<IReadOnlyList<ILateUpdatable>> lateUpdatableServices,
+                ContainerLocal<IReadOnlyList<IFixedUpdatable>> fixedUpdatableServices,
                 ContainerLocal<IReadOnlyList<IApplicationFocusLostListener>> focusLostListeners,
                 ContainerLocal<IReadOnlyList<IApplicationFocusGainListener>> focusGainListeners,
-                ContainerLocal<IReadOnlyList<IApplicationPausedListener>>    pausedListeners,
-                ContainerLocal<IReadOnlyList<IApplicationResumedListener>>   resumedListeners,
-                ContainerLocal<IReadOnlyList<IApplicationQuitedListener>>    quitedListeners,
-                ILoggerManager                                               loggerManager
+                ContainerLocal<IReadOnlyList<IApplicationPausedListener>> pausedListeners,
+                ContainerLocal<IReadOnlyList<IApplicationResumedListener>> resumedListeners,
+                ContainerLocal<IReadOnlyList<IApplicationQuitedListener>> quitedListeners,
+                ILoggerManager loggerManager
             ) : base(
                 loadableServices.Value,
                 updatableServices.Value,

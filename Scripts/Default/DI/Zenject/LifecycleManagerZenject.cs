@@ -17,16 +17,16 @@ namespace UniT.Lifecycle.Default.DI
         {
             [Preserve]
             public ZenjectLifecycleManager(
-                [InjectLocal] IReadOnlyList<ILoadOrder>                    loadableServices,
-                [InjectLocal] IReadOnlyList<IUpdatable>                    updatableServices,
-                [InjectLocal] IReadOnlyList<ILateUpdatable>                lateUpdatableServices,
-                [InjectLocal] IReadOnlyList<IFixedUpdatable>               fixedUpdatableServices,
+                [InjectLocal] IReadOnlyList<ILoadOrder> loadableServices,
+                [InjectLocal] IReadOnlyList<IUpdatable> updatableServices,
+                [InjectLocal] IReadOnlyList<ILateUpdatable> lateUpdatableServices,
+                [InjectLocal] IReadOnlyList<IFixedUpdatable> fixedUpdatableServices,
                 [InjectLocal] IReadOnlyList<IApplicationFocusLostListener> focusLostListeners,
                 [InjectLocal] IReadOnlyList<IApplicationFocusGainListener> focusGainListeners,
-                [InjectLocal] IReadOnlyList<IApplicationPausedListener>    pausedListeners,
-                [InjectLocal] IReadOnlyList<IApplicationResumedListener>   resumedListeners,
-                [InjectLocal] IReadOnlyList<IApplicationQuitedListener>    quitedListeners,
-                ILoggerManager                                             loggerManager
+                [InjectLocal] IReadOnlyList<IApplicationPausedListener> pausedListeners,
+                [InjectLocal] IReadOnlyList<IApplicationResumedListener> resumedListeners,
+                [InjectLocal] IReadOnlyList<IApplicationQuitedListener> quitedListeners,
+                ILoggerManager loggerManager
             ) : base(
                 loadableServices,
                 updatableServices,

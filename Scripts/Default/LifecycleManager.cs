@@ -10,57 +10,57 @@ namespace UniT.Lifecycle.Default
     using UniT.Logging;
     using UnityEngine;
     using UnityEngine.Scripting;
-    using ILogger = UniT.Logging.ILogger;
+    using ILogger = Logging.ILogger;
     using Object = UnityEngine.Object;
 
     public class LifecycleManager : ILifecycleManager, IDisposable
     {
         private readonly IReadOnlyList<ILoadOrder> loadableServices;
 
-        private readonly IReadOnlyList<IUpdatable>      updatableServices;
-        private readonly IReadOnlyList<ILateUpdatable>  lateUpdatableServices;
+        private readonly IReadOnlyList<IUpdatable> updatableServices;
+        private readonly IReadOnlyList<ILateUpdatable> lateUpdatableServices;
         private readonly IReadOnlyList<IFixedUpdatable> fixedUpdatableServices;
 
         private readonly IReadOnlyList<IApplicationFocusLostListener> focusLostListeners;
         private readonly IReadOnlyList<IApplicationFocusGainListener> focusGainListeners;
-        private readonly IReadOnlyList<IApplicationPausedListener>    pausedListeners;
-        private readonly IReadOnlyList<IApplicationResumedListener>   resumedListeners;
-        private readonly IReadOnlyList<IApplicationQuitedListener>    quitedListeners;
+        private readonly IReadOnlyList<IApplicationPausedListener> pausedListeners;
+        private readonly IReadOnlyList<IApplicationResumedListener> resumedListeners;
+        private readonly IReadOnlyList<IApplicationQuitedListener> quitedListeners;
 
         private readonly ILogger logger;
 
         [Preserve]
         public LifecycleManager(
-            IReadOnlyList<ILoadOrder>                    loadableServices,
-            IReadOnlyList<IUpdatable>                    updatableServices,
-            IReadOnlyList<ILateUpdatable>                lateUpdatableServices,
-            IReadOnlyList<IFixedUpdatable>               fixedUpdatableServices,
+            IReadOnlyList<ILoadOrder> loadableServices,
+            IReadOnlyList<IUpdatable> updatableServices,
+            IReadOnlyList<ILateUpdatable> lateUpdatableServices,
+            IReadOnlyList<IFixedUpdatable> fixedUpdatableServices,
             IReadOnlyList<IApplicationFocusLostListener> focusLostListeners,
             IReadOnlyList<IApplicationFocusGainListener> focusGainListeners,
-            IReadOnlyList<IApplicationPausedListener>    pausedListeners,
-            IReadOnlyList<IApplicationResumedListener>   resumedListeners,
-            IReadOnlyList<IApplicationQuitedListener>    quitedListeners,
-            ILoggerManager                               loggerManager
+            IReadOnlyList<IApplicationPausedListener> pausedListeners,
+            IReadOnlyList<IApplicationResumedListener> resumedListeners,
+            IReadOnlyList<IApplicationQuitedListener> quitedListeners,
+            ILoggerManager loggerManager
         )
         {
             this.loadableServices = loadableServices;
 
-            this.updatableServices      = updatableServices;
-            this.lateUpdatableServices  = lateUpdatableServices;
+            this.updatableServices = updatableServices;
+            this.lateUpdatableServices = lateUpdatableServices;
             this.fixedUpdatableServices = fixedUpdatableServices;
 
             this.focusLostListeners = focusLostListeners;
             this.focusGainListeners = focusGainListeners;
-            this.pausedListeners    = pausedListeners;
-            this.resumedListeners   = resumedListeners;
-            this.quitedListeners    = quitedListeners;
+            this.pausedListeners = pausedListeners;
+            this.resumedListeners = resumedListeners;
+            this.quitedListeners = quitedListeners;
 
             this.logger = loggerManager.GetLogger(this);
             this.logger.Debug("Constructed");
         }
 
         private EventListener eventListener = null!;
-        private bool          isLoading;
+        private bool isLoading;
 
         async UniTask ILifecycleManager.LoadAsync(IProgress<float>? progress, CancellationToken cancellationToken)
         {
@@ -98,15 +98,15 @@ namespace UniT.Lifecycle.Default
 
                 this.eventListener = new GameObject(nameof(LifecycleManager)).AddComponent<EventListener>().DontDestroyOnLoad();
 
-                foreach (var service in this.updatableServices) this.eventListener.Updating           += service.Update;
-                foreach (var service in this.lateUpdatableServices) this.eventListener.LateUpdating   += service.LateUpdate;
+                foreach (var service in this.updatableServices) this.eventListener.Updating += service.Update;
+                foreach (var service in this.lateUpdatableServices) this.eventListener.LateUpdating += service.LateUpdate;
                 foreach (var service in this.fixedUpdatableServices) this.eventListener.FixedUpdating += service.FixedUpdate;
 
                 foreach (var service in this.focusLostListeners) this.eventListener.FocusLost += service.OnFocusLost;
                 foreach (var service in this.focusGainListeners) this.eventListener.FocusGain += service.OnFocusGain;
-                foreach (var service in this.pausedListeners) this.eventListener.Paused       += service.OnPaused;
-                foreach (var service in this.resumedListeners) this.eventListener.Resumed     += service.OnResumed;
-                foreach (var service in this.quitedListeners) this.eventListener.Quited       += service.OnQuited;
+                foreach (var service in this.pausedListeners) this.eventListener.Paused += service.OnPaused;
+                foreach (var service in this.resumedListeners) this.eventListener.Resumed += service.OnResumed;
+                foreach (var service in this.quitedListeners) this.eventListener.Quited += service.OnQuited;
             }
             finally
             {
@@ -118,15 +118,15 @@ namespace UniT.Lifecycle.Default
         {
             if (!this.eventListener) return;
 
-            foreach (var service in this.updatableServices) this.eventListener.Updating           -= service.Update;
-            foreach (var service in this.lateUpdatableServices) this.eventListener.LateUpdating   -= service.LateUpdate;
+            foreach (var service in this.updatableServices) this.eventListener.Updating -= service.Update;
+            foreach (var service in this.lateUpdatableServices) this.eventListener.LateUpdating -= service.LateUpdate;
             foreach (var service in this.fixedUpdatableServices) this.eventListener.FixedUpdating -= service.FixedUpdate;
 
             foreach (var service in this.focusLostListeners) this.eventListener.FocusLost -= service.OnFocusLost;
             foreach (var service in this.focusGainListeners) this.eventListener.FocusGain -= service.OnFocusGain;
-            foreach (var service in this.pausedListeners) this.eventListener.Paused       -= service.OnPaused;
-            foreach (var service in this.resumedListeners) this.eventListener.Resumed     -= service.OnResumed;
-            foreach (var service in this.quitedListeners) this.eventListener.Quited       -= service.OnQuited;
+            foreach (var service in this.pausedListeners) this.eventListener.Paused -= service.OnPaused;
+            foreach (var service in this.resumedListeners) this.eventListener.Resumed -= service.OnResumed;
+            foreach (var service in this.quitedListeners) this.eventListener.Quited -= service.OnQuited;
 
             Object.Destroy(this.eventListener.gameObject);
 
