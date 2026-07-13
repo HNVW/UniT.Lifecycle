@@ -1,5 +1,5 @@
 #nullable enable
-namespace UniT.Lifecycle.Default
+namespace UniT.Lifecycle
 {
     using System;
     using System.Collections.Generic;

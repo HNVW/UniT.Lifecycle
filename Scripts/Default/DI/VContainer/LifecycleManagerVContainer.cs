@@ -1,5 +1,5 @@
 #nullable enable
-namespace UniT.Lifecycle.Default.DI
+namespace UniT.Lifecycle.DI
 {
     using System.Collections.Generic;
     using Logging;
