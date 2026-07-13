@@ -2,7 +2,7 @@
 namespace UniT.Lifecycle.Default.DI
 {
     using System.Collections.Generic;
-    using UniT.Logging;
+    using Logging;
     using Zenject;
     using Zenject.Internal;
 

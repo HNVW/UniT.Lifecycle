@@ -6,8 +6,8 @@ namespace UniT.Lifecycle.Default
     using System.Linq;
     using System.Threading;
     using Cysharp.Threading.Tasks;
-    using UniT.Extensions;
-    using UniT.Logging;
+    using Extensions;
+    using Logging;
     using UnityEngine;
     using UnityEngine.Scripting;
     using ILogger = Logging.ILogger;
@@ -59,7 +59,7 @@ namespace UniT.Lifecycle.Default
             this.logger.Debug("Constructed");
         }
 
-        private EventListener eventListener = null!;
+        private EventListener? eventListener;
         private bool isLoading;
 
         async UniTask ILifecycleManager.LoadAsync(IProgress<float>? progress, CancellationToken cancellationToken)
@@ -116,7 +116,7 @@ namespace UniT.Lifecycle.Default
 
         void IDisposable.Dispose()
         {
-            if (!this.eventListener) return;
+            if (this.eventListener is null) return;
 
             foreach (var service in this.updatableServices) this.eventListener.Updating -= service.Update;
             foreach (var service in this.lateUpdatableServices) this.eventListener.LateUpdating -= service.LateUpdate;
@@ -128,7 +128,7 @@ namespace UniT.Lifecycle.Default
             foreach (var service in this.resumedListeners) this.eventListener.Resumed -= service.OnResumed;
             foreach (var service in this.quitedListeners) this.eventListener.Quited -= service.OnQuited;
 
-            Object.Destroy(this.eventListener.gameObject);
+            if (this.eventListener) Object.Destroy(this.eventListener.gameObject);
 
             this.logger.Debug("Disposed");
         }

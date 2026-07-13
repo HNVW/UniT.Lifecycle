@@ -1,7 +1,7 @@
 #nullable enable
 namespace UniT.Lifecycle.Default.DI
 {
-    using UniT.DI;
+    using InternalDI;
 
     public static class LifecycleManagerInternalDI
     {
