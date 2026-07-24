@@ -69,32 +69,32 @@ namespace UniT.Lifecycle
             this.isLoading = true;
             try
             {
-                await this.loadableServices.GroupBy(service => service.Order)
-                    .OrderBy(group => group.Key)
-                    .ForEachAwaitAsync(async (group, progress, cancellationToken) =>
+                await this.loadableServices.GroupBy(static service => service.Order)
+                    .OrderBy(static group => group.Key)
+                    .ForEachAwaitAsync(static async (group, @this, progress, cancellationToken) =>
                     {
-                        this.logger.Debug($"Loading group {group.Key}");
+                        @this.logger.Debug($"Loading group {group.Key}");
 
-                        var (sync, async) = group.Split(service => service is ILoadable);
+                        var (sync, async) = group.Split(static service => service is ILoadable);
 
-                        var task = async.Cast<IAsyncLoadable>().ForEachAsync(async (service, progress, cancellationToken) =>
+                        var task = async.Cast<IAsyncLoadable>().ForEachAsync(static async (service, @this, progress, cancellationToken) =>
                         {
-                            this.logger.Debug($"Loading {service.GetType().Name}");
+                            @this.logger.Debug($"Loading {service.GetType().Name}");
                             await service.LoadAsync(progress, cancellationToken);
-                            this.logger.Debug($"Loaded {service.GetType().Name}");
-                        }, progress, cancellationToken);
+                            @this.logger.Debug($"Loaded {service.GetType().Name}");
+                        }, progress, cancellationToken, @this);
 
                         sync.Cast<ILoadable>().ForEach(static (service, @this) =>
                         {
                             @this.logger.Debug($"Loading {service.GetType().Name}");
                             service.Load();
                             @this.logger.Debug($"Loaded {service.GetType().Name}");
-                        }, this);
+                        }, @this);
 
                         await task;
 
-                        this.logger.Debug($"Loaded group {group.Key}");
-                    }, progress, cancellationToken);
+                        @this.logger.Debug($"Loaded group {group.Key}");
+                    }, progress, cancellationToken, this);
 
                 this.eventListener = new GameObject(nameof(LifecycleManager)).AddComponent<EventListener>().DontDestroyOnLoad();
 
