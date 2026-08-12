@@ -17,7 +17,8 @@ namespace UniT.Lifecycle.DI
         {
             [Preserve]
             public VContainerLifecycleManager(
-                ContainerLocal<IReadOnlyList<ILoadOrder>> loadableServices,
+                ContainerLocal<IReadOnlyList<ILoadable>> loadableServices,
+                ContainerLocal<IReadOnlyList<IAsyncLoadable>> asyncLoadableServices,
                 ContainerLocal<IReadOnlyList<IUpdatable>> updatableServices,
                 ContainerLocal<IReadOnlyList<ILateUpdatable>> lateUpdatableServices,
                 ContainerLocal<IReadOnlyList<IFixedUpdatable>> fixedUpdatableServices,
@@ -29,6 +30,7 @@ namespace UniT.Lifecycle.DI
                 ILoggerManager loggerManager
             ) : base(
                 loadableServices.Value,
+                asyncLoadableServices.Value,
                 updatableServices.Value,
                 lateUpdatableServices.Value,
                 fixedUpdatableServices.Value,

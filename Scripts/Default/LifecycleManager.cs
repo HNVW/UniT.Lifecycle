@@ -15,7 +15,8 @@ namespace UniT.Lifecycle
 
     public class LifecycleManager : ILifecycleManager, IDisposable
     {
-        private readonly IReadOnlyList<ILoadOrder> loadableServices;
+        private readonly IReadOnlyList<ILoadable> loadableServices;
+        private readonly IReadOnlyList<IAsyncLoadable> asyncLoadableServices;
 
         private readonly IReadOnlyList<IUpdatable> updatableServices;
         private readonly IReadOnlyList<ILateUpdatable> lateUpdatableServices;
@@ -31,7 +32,8 @@ namespace UniT.Lifecycle
 
         [Preserve]
         public LifecycleManager(
-            IReadOnlyList<ILoadOrder> loadableServices,
+            IReadOnlyList<ILoadable> loadableServices,
+            IReadOnlyList<IAsyncLoadable> asyncLoadableServices,
             IReadOnlyList<IUpdatable> updatableServices,
             IReadOnlyList<ILateUpdatable> lateUpdatableServices,
             IReadOnlyList<IFixedUpdatable> fixedUpdatableServices,
@@ -44,6 +46,7 @@ namespace UniT.Lifecycle
         )
         {
             this.loadableServices = loadableServices;
+            this.asyncLoadableServices = asyncLoadableServices;
 
             this.updatableServices = updatableServices;
             this.lateUpdatableServices = lateUpdatableServices;
@@ -69,7 +72,7 @@ namespace UniT.Lifecycle
             this.isLoading = true;
             try
             {
-                await this.loadableServices.GroupBy(static service => service.Order)
+                await this.loadableServices.Concat<IHasOrder>(this.asyncLoadableServices).GroupBy(static service => service.Order)
                     .OrderBy(static group => group.Key)
                     .ForEachAwaitAsync(static async (group, @this, progress, cancellationToken) =>
                     {
@@ -98,15 +101,15 @@ namespace UniT.Lifecycle
 
                 this.eventListener = new GameObject(nameof(LifecycleManager)).AddComponent<EventListener>().DontDestroyOnLoad();
 
-                foreach (var service in this.updatableServices) this.eventListener.Updating += service.Update;
-                foreach (var service in this.lateUpdatableServices) this.eventListener.LateUpdating += service.LateUpdate;
-                foreach (var service in this.fixedUpdatableServices) this.eventListener.FixedUpdating += service.FixedUpdate;
+                foreach (var service in this.updatableServices.OrderBy(service => service.Order)) this.eventListener.Updating += service.Update;
+                foreach (var service in this.lateUpdatableServices.OrderBy(service => service.Order)) this.eventListener.LateUpdating += service.LateUpdate;
+                foreach (var service in this.fixedUpdatableServices.OrderBy(service => service.Order)) this.eventListener.FixedUpdating += service.FixedUpdate;
 
-                foreach (var service in this.focusLostListeners) this.eventListener.FocusLost += service.OnFocusLost;
-                foreach (var service in this.focusGainListeners) this.eventListener.FocusGain += service.OnFocusGain;
-                foreach (var service in this.pausedListeners) this.eventListener.Paused += service.OnPaused;
-                foreach (var service in this.resumedListeners) this.eventListener.Resumed += service.OnResumed;
-                foreach (var service in this.quitedListeners) this.eventListener.Quited += service.OnQuited;
+                foreach (var service in this.focusLostListeners.OrderBy(service => service.Order)) this.eventListener.FocusLost += service.OnFocusLost;
+                foreach (var service in this.focusGainListeners.OrderBy(service => service.Order)) this.eventListener.FocusGain += service.OnFocusGain;
+                foreach (var service in this.pausedListeners.OrderBy(service => service.Order)) this.eventListener.Paused += service.OnPaused;
+                foreach (var service in this.resumedListeners.OrderBy(service => service.Order)) this.eventListener.Resumed += service.OnResumed;
+                foreach (var service in this.quitedListeners.OrderBy(service => service.Order)) this.eventListener.Quited += service.OnQuited;
             }
             finally
             {
@@ -118,15 +121,15 @@ namespace UniT.Lifecycle
         {
             if (this.eventListener is null) return;
 
-            foreach (var service in this.updatableServices) this.eventListener.Updating -= service.Update;
-            foreach (var service in this.lateUpdatableServices) this.eventListener.LateUpdating -= service.LateUpdate;
-            foreach (var service in this.fixedUpdatableServices) this.eventListener.FixedUpdating -= service.FixedUpdate;
+            foreach (var service in this.updatableServices.OrderByDescending(service => service.Order)) this.eventListener.Updating -= service.Update;
+            foreach (var service in this.lateUpdatableServices.OrderByDescending(service => service.Order)) this.eventListener.LateUpdating -= service.LateUpdate;
+            foreach (var service in this.fixedUpdatableServices.OrderByDescending(service => service.Order)) this.eventListener.FixedUpdating -= service.FixedUpdate;
 
-            foreach (var service in this.focusLostListeners) this.eventListener.FocusLost -= service.OnFocusLost;
-            foreach (var service in this.focusGainListeners) this.eventListener.FocusGain -= service.OnFocusGain;
-            foreach (var service in this.pausedListeners) this.eventListener.Paused -= service.OnPaused;
-            foreach (var service in this.resumedListeners) this.eventListener.Resumed -= service.OnResumed;
-            foreach (var service in this.quitedListeners) this.eventListener.Quited -= service.OnQuited;
+            foreach (var service in this.focusLostListeners.OrderByDescending(service => service.Order)) this.eventListener.FocusLost -= service.OnFocusLost;
+            foreach (var service in this.focusGainListeners.OrderByDescending(service => service.Order)) this.eventListener.FocusGain -= service.OnFocusGain;
+            foreach (var service in this.pausedListeners.OrderByDescending(service => service.Order)) this.eventListener.Paused -= service.OnPaused;
+            foreach (var service in this.resumedListeners.OrderByDescending(service => service.Order)) this.eventListener.Resumed -= service.OnResumed;
+            foreach (var service in this.quitedListeners.OrderByDescending(service => service.Order)) this.eventListener.Quited -= service.OnQuited;
 
             if (this.eventListener) Object.Destroy(this.eventListener.gameObject);
 

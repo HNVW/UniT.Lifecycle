@@ -1,17 +1,17 @@
 #nullable enable
 namespace UniT.Lifecycle
 {
-    public interface IUpdatable
+    public interface IUpdatable : IHasOrder
     {
         public void Update();
     }
 
-    public interface ILateUpdatable
+    public interface ILateUpdatable : IHasOrder
     {
         public void LateUpdate();
     }
 
-    public interface IFixedUpdatable
+    public interface IFixedUpdatable : IHasOrder
     {
         public void FixedUpdate();
     }

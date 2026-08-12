@@ -17,7 +17,8 @@ namespace UniT.Lifecycle.DI
         {
             [Preserve]
             public ZenjectLifecycleManager(
-                [InjectLocal] IReadOnlyList<ILoadOrder> loadableServices,
+                [InjectLocal] IReadOnlyList<ILoadable> loadableServices,
+                [InjectLocal] IReadOnlyList<IAsyncLoadable> asyncLoadableServices,
                 [InjectLocal] IReadOnlyList<IUpdatable> updatableServices,
                 [InjectLocal] IReadOnlyList<ILateUpdatable> lateUpdatableServices,
                 [InjectLocal] IReadOnlyList<IFixedUpdatable> fixedUpdatableServices,
@@ -29,6 +30,7 @@ namespace UniT.Lifecycle.DI
                 ILoggerManager loggerManager
             ) : base(
                 loadableServices,
+                asyncLoadableServices,
                 updatableServices,
                 lateUpdatableServices,
                 fixedUpdatableServices,
